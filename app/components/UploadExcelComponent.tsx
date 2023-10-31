@@ -1,8 +1,9 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import ExcelJS, { Workbook, Worksheet } from "exceljs";
 
 const UploadExcelComponent: React.FC = () => {
+    const [loading, setLoading] = useState(false); // ローディング状態の管理
     // FileからBufferへの変換関数
     async function fileToBuffer(file: File): Promise<Buffer> {
         return new Promise((resolve, reject) => {
@@ -124,6 +125,7 @@ const UploadExcelComponent: React.FC = () => {
 
     // ファイル変更時の処理
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        setLoading(true); // ローディング開始
         const file = event.target.files && event.target.files[0];
 
         if (file) {
@@ -141,44 +143,50 @@ const UploadExcelComponent: React.FC = () => {
 
                 const link = document.createElement("a");
                 link.href = url;
-                link.setAttribute("download", "processed_file.xlsx");
+                link.setAttribute("download", "献立表結果.xlsx");
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
             } catch (error) {
                 console.error("Error processing Excel file:", error);
                 // エラーメッセージをユーザーに表示（必要に応じて）
+            } finally {
+                setLoading(false); // ローディング終了
             }
         }
     };
 
     return (
         <div className="flex items-center justify-center h-screen">
-          <label htmlFor="file-upload" className="flex flex-col items-center px-4 py-6 bg-gray-100 rounded-md shadow-md tracking-wide cursor-pointer">
-            <svg
-              className="w-8 h-8 mb-2"
-              fill="currentColor"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 3a1 1 0 0 1 1 1v4.586l2.293-2.293a1 1 0 1 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4a1 1 0 1 1 1.414-1.414L9 8.586V4a1 1 0 0 1 1-1z"
-              />
-              <path
-                fillRule="evenodd"
-                d="M2 13a1 1 0 0 1 1-1h14a1 1 0 0 1 0 2H3a1 1 0 0 1-1-1z"
-              />
-            </svg>
-            <span className="text-base leading-normal">ファイルを選択</span>
-            <input
-              id="file-upload"
-              type="file"
-              accept=".xlsx"
-              onChange={(event) => handleFileChange(event)}
-              className="hidden"
-            />
-          </label>
+            {loading ? ( // ローディング状態に応じて表示を切り替え
+                <div className="loader">Loading...</div>
+            ) : (
+                <label htmlFor="file-upload" className="flex flex-col items-center px-4 py-6 bg-gray-100 rounded-md shadow-md tracking-wide cursor-pointer">
+                <svg
+                  className="w-8 h-8 mb-2"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 3a1 1 0 0 1 1 1v4.586l2.293-2.293a1 1 0 1 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4a1 1 0 1 1 1.414-1.414L9 8.586V4a1 1 0 0 1 1-1z"
+                  />
+                  <path
+                    fillRule="evenodd"
+                    d="M2 13a1 1 0 0 1 1-1h14a1 1 0 0 1 0 2H3a1 1 0 0 1-1-1z"
+                  />
+                </svg>
+                <span className="text-base leading-normal">ファイルを選択</span>
+                <input
+                  id="file-upload"
+                  type="file"
+                  accept=".xlsx"
+                  onChange={(event) => handleFileChange(event)}
+                  className="hidden"
+                />
+              </label>
+            )}
         </div>
       );
 };
